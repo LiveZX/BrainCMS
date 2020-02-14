@@ -12,11 +12,19 @@
 							<i class="fa fa-dashboard"></i> <span>Dashboard</span>
 							</a>
 							</li>';
-						}
+
+                            echo '
+                              <li>
+                                <a href="'.$config['hotelUrl'].'/adminpan/badgeupload">
+                                  <i class="fa fa-upload"></i> <span>Badge Upload</span>
+                                </a>
+                              </li>
+                            ';
+                        }
 
 						if (User::userData('rank') > '5')
 						{
-							echo'	
+							echo'
 							<li>
 							<a href="'.$config['hotelUrl'].'/adminpan/news">
 							<i class="fa fa-newspaper-o"></i> <span>News</span>
@@ -26,7 +34,7 @@
 						}
 						if (User::userData('rank') > '7')
 						{
-							echo'	
+							echo'
 							<li>
 							<a href="'.$config['hotelUrl'].'/adminpan/sollie">
 							<i class="fa fa-newspaper-o"></i> <span>Applications</span>
@@ -37,7 +45,7 @@
 
 						if (User::userData('rank') > '7')
 						{
-							echo'	
+							echo'
 							<li>
 							<a href="'.$config['hotelUrl'].'/adminpan/zoekgebruiker">
 							<i class="fa fa-user"></i> <span>Edit A User</span>
@@ -86,7 +94,7 @@
 							</li>';
 						}
 					?>
-				
+
 				</ul>
 			</section>
-		</aside>							
+		</aside>

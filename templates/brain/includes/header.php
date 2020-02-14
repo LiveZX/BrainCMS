@@ -37,9 +37,9 @@
 			<div class="center">
 				<a href="/">
 					<div class="head_enter">
-						<a href="/client" onclick="window.open('/client','new','toolbar=0,scrollbars=0,location=1,statusbar=1,menubar=0,resizable=1,width=1270,height=700');return false;" class="btn btn-success"><?= $lang["Hgoto"] ?></a> 
+						<a href="/client" onclick="window.open('/client','new','toolbar=0,scrollbars=0,location=1,statusbar=1,menubar=0,resizable=1,width=1270,height=700');return false;" class="btn btn-success"><?= $lang["Hgoto"] ?></a>
 						<a onclick="<?= $config['hotelUrl'] ?>/logout" href="<?= $config['hotelUrl'] ?>/logout" class="btn btn-danger"><?= $lang["HsignOut"] ?></a>
-					</div> 
+					</div>
 					<div class="wrap">
 						<div class="logo">
 						</div>
@@ -49,7 +49,7 @@
 					<?php
 						if (User::userData('rank') > '3')
 						{
-							echo'	
+							echo'
 							<div class="langbox"><a href="/adminpan/dash"><img src="/templates/brain/style/images/menuicons/settings_icon.png" style="padding:7px;float:right;"> </div>
 							';
 						}
@@ -64,7 +64,7 @@
 								<a href="/"><?= User::userData('username') ?></a>
 								<div class="submenu">
 									<a href="/me"><?= User::userData('username') ?></a>
-									<a href="/settingspassword"><?= $lang["Naccountsettings"] ?></a> 
+									<a href="/settingspassword"><?= $lang["Naccountsettings"] ?></a>
 									<a href="/home/<?= User::userData('username') ?>"><?= $lang["Nmyprofile"] ?></a>
 									<a href="/sessionlog"><?= $lang["Nsessionlog"] ?></a>
 									<a href="/logout"><?= $lang["NsignOut"] ?></a>
@@ -85,6 +85,7 @@
 									<a href="/advertentie_tips"><?= $lang["Nadvertisementtips"] ?></a>
 									<a href="/stats"><?= $lang["Nstatistics"] ?></a>
 									<a href="/online"><?= $lang["Nonline"] ?> <?= $config['hotelName'] ?>'s</a>
+                                    <a href="/badgeupload">Badge Upload</a>
 								</div>
 							</li>
 							<li class="paars">
@@ -104,6 +105,4 @@
 						</ul>
 					</div>
 				</div>
-			</nav>	
-				
-				
+			</nav>
