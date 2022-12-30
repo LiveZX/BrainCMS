@@ -1,11 +1,11 @@
 <?php
-	if(!defined('BRAIN_CMS')) 
-	{ 
-		die('Sorry but you cannot access this file!'); 
+	if(!defined('BRAIN_CMS'))
+	{
+		die('Sorry but you cannot access this file!');
 	}
-	/* 
+	/*
 		Functions list Class Admin.
-		--------------- 
+		---------------
 		error();
 		gelukt();
 		CheckRank();
@@ -27,6 +27,57 @@
 	*/
 	Class Admin
 	{
+        public static function badgeApprove()
+        {
+            if (! isset($_POST['badgeApprove'])) {
+                return;
+            }
+
+            $userId  = trim(filter_var($_POST['userId'], FILTER_SANITIZE_NUMBER_INT));
+            $badgeId = trim(filter_var($_POST['badgeId'], FILTER_SANITIZE_NUMBER_INT));
+            $code    = trim(filter_var($_POST['code'], FILTER_SANITIZE_STRING));
+
+            global $dbh;
+
+            $query = $dbh->prepare('INSERT INTO users_badges (`user_id`, `badge_code`) VALUES (?, ?)');
+            $query->execute([ $userId, $code ]);
+
+            $query = $dbh->prepare('DELETE FROM badge_upload WHERE id = ? LIMIT 1');
+            $query->execute([ $badgeId ]);
+
+            return '<div class="alert alert-block alert-success"><strong>Badge "' . $code . '" wurde hinzugefügt!</div>';
+        }
+
+        public static function badgeDeny()
+        {
+            if (! isset($_POST['badgeDeny'])) {
+                return;
+            }
+
+            $badgeId = trim(filter_var($_POST['badgeId'], FILTER_SANITIZE_NUMBER_INT));
+            $code    = trim(filter_var($_POST['code'], FILTER_SANITIZE_STRING));
+
+            global $dbh;
+
+            $query = $dbh->prepare('DELETE FROM badge_upload WHERE id = ? LIMIT 1');
+            $query->execute([ $badgeId ]);
+
+            unlink("{$_SERVER['DOCUMENT_ROOT']}/swfs/c_images/album1584/{$code}.gif");
+
+            return '<div class="alert alert-block alert-success"><strong>Badge "' . $code . '" wurde entfernt!</div>';
+        }
+
+        public static function getBadges()
+        {
+            global $dbh;
+
+            $query = $dbh->prepare('SELECT * FROM badge_upload ORDER BY id DESC');
+            $query->execute();
+
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+
 		public static function error($errorName)
 		{
 			echo "<div class=\"alert alert-block alert-danger \"><strong>" . $errorName . "</div>";
@@ -41,7 +92,7 @@
 			{
 				if (User::userData('rank') <= $rank)
 				{
-					header('Location: '.$config['hotelUrl'].'/index');	
+					header('Location: '.$config['hotelUrl'].'/index');
 					exit();
 				}
 			}
@@ -49,11 +100,11 @@
 		public static function UpdateUser()
 		{
 			global $dbh,$config;
-			if (isset($_POST['update'])) 
+			if (isset($_POST['update']))
 			{
 				if ($config['hotelEmu'] == 'arcturus')
 				{
-					$upateUser = $dbh->prepare("UPDATE users SET 
+					$upateUser = $dbh->prepare("UPDATE users SET
 					motto=:motto,
 					username=:name,
 					mail=:mail,
@@ -61,34 +112,34 @@
 					teamrank=:teamrank,
 					rank=:rank
 					WHERE username = :name");
-					$upateUser->bindParam(':motto', $_POST['motto']); 
-					$upateUser->bindParam(':name', $_POST['naam']); 
-					$upateUser->bindParam(':mail', $_POST['mail']); 
-					$upateUser->bindParam(':credits', $_POST['credits']); 
-					$upateUser->bindParam(':teamrank', $_POST['teamrank']); 
-					$upateUser->bindParam(':rank', $_POST['rank']); 
-					$upateUser->execute(); 
+					$upateUser->bindParam(':motto', $_POST['motto']);
+					$upateUser->bindParam(':name', $_POST['naam']);
+					$upateUser->bindParam(':mail', $_POST['mail']);
+					$upateUser->bindParam(':credits', $_POST['credits']);
+					$upateUser->bindParam(':teamrank', $_POST['teamrank']);
+					$upateUser->bindParam(':rank', $_POST['rank']);
+					$upateUser->execute();
 					$getUserCurrency = $dbh->prepare("SELECT * FROM users WHERE username=:username LIMIT 1");
 					$getUserCurrency->bindParam(':username', $_POST['naam']);
 					$getUserCurrency->execute();
 					$getUserCurrencyData = $getUserCurrency->fetch();
-					$updateUserCurrencyDuckets = $dbh->prepare("UPDATE users_currency SET 
+					$updateUserCurrencyDuckets = $dbh->prepare("UPDATE users_currency SET
 					amount=:activity_points
 					WHERE user_id = :user_id and type = 0");
 					$updateUserCurrencyDuckets->bindParam(':user_id', $getUserCurrencyData['id']);
 					$updateUserCurrencyDuckets->bindParam(':activity_points', $_POST['activity_points']);
-					$updateUserCurrencyDuckets->execute(); 
-					$updateUserCurrencyDiamonds = $dbh->prepare("UPDATE users_currency SET 
+					$updateUserCurrencyDuckets->execute();
+					$updateUserCurrencyDiamonds = $dbh->prepare("UPDATE users_currency SET
 					amount=:vip_points
 					WHERE user_id = :user_id and type = 5");
 					$updateUserCurrencyDiamonds->bindParam(':user_id', $getUserCurrencyData['id']);
-					$updateUserCurrencyDiamonds->bindParam(':vip_points', $_POST['vip_points']); 
-					$updateUserCurrencyDiamonds->execute(); 
+					$updateUserCurrencyDiamonds->bindParam(':vip_points', $_POST['vip_points']);
+					$updateUserCurrencyDiamonds->execute();
 					Admin::succeed("The user is saved!");
 				}
 				else
 				{
-					$upateUser = $dbh->prepare("UPDATE users SET 
+					$upateUser = $dbh->prepare("UPDATE users SET
 					motto=:motto,
 					username=:name,
 					mail=:mail,
@@ -98,15 +149,15 @@
 					teamrank=:teamrank,
 					rank=:rank
 					WHERE username = :name");
-					$upateUser->bindParam(':motto', $_POST['motto']); 
-					$upateUser->bindParam(':name', $_POST['naam']); 
-					$upateUser->bindParam(':mail', $_POST['mail']); 
-					$upateUser->bindParam(':credits', $_POST['credits']); 
-					$upateUser->bindParam(':vip_points', $_POST['vip_points']); 
-					$upateUser->bindParam(':activity_points', $_POST['activity_points']); 
-					$upateUser->bindParam(':teamrank', $_POST['teamrank']); 
-					$upateUser->bindParam(':rank', $_POST['rank']); 
-					$upateUser->execute(); 
+					$upateUser->bindParam(':motto', $_POST['motto']);
+					$upateUser->bindParam(':name', $_POST['naam']);
+					$upateUser->bindParam(':mail', $_POST['mail']);
+					$upateUser->bindParam(':credits', $_POST['credits']);
+					$upateUser->bindParam(':vip_points', $_POST['vip_points']);
+					$upateUser->bindParam(':activity_points', $_POST['activity_points']);
+					$upateUser->bindParam(':teamrank', $_POST['teamrank']);
+					$upateUser->bindParam(':rank', $_POST['rank']);
+					$upateUser->execute();
 					Admin::succeed("The user is saved!");
 				}
 			}
@@ -114,31 +165,31 @@
 		public static function UpdateUserOfTheWeek()
 		{
 			global $dbh;
-			if (isset($_POST['update'])) 
+			if (isset($_POST['update']))
 			{
 				$getUserData = $dbh->prepare("SELECT id,username FROM users WHERE username = :name");
-				$getUserData->bindParam(':name', $_POST['naam']); 
-				$getUserData->execute(); 
+				$getUserData->bindParam(':name', $_POST['naam']);
+				$getUserData->execute();
 				$upateUser2 = $getUserData->fetch();
 				if ($upateUser = $dbh->prepare("UPDATE uotw SET userid=:userdata,text=:txt"))
 				{
-					$upateUser->bindParam(':userdata', $upateUser2['id']); 
-					$upateUser->bindParam(':txt', $_POST['uftwtext']); 
+					$upateUser->bindParam(':userdata', $upateUser2['id']);
+					$upateUser->bindParam(':txt', $_POST['uftwtext']);
 					$upateUser->execute();
 					Admin::succeed("The user now has UOTW");
 				}
-				else 
+				else
 				{
 					Admin::error("Did not work!");
-				}  
+				}
 			}
 		}
 		public static function UpdateNews()
 		{
 			global $dbh;
-			if (isset($_POST['update'])) 
+			if (isset($_POST['update']))
 			{
-				$editNews = $dbh->prepare("UPDATE cms_news SET 
+				$editNews = $dbh->prepare("UPDATE cms_news SET
 				id=:id,
 				title=:title,
 				shortstory=:shortstory,
@@ -157,9 +208,9 @@
 		public static function searchUser()
 		{
 			global $dbh,$config;
-			if(isset($_POST['zoek'])) {	
+			if(isset($_POST['zoek'])) {
 				$searchUser = $dbh->prepare("SELECT * FROM users WHERE username = :user");
-				$searchUser->bindParam(':user', $_POST['user']); 
+				$searchUser->bindParam(':user', $_POST['user']);
 				$searchUser->execute();
 				if ($searchUser->RowCount() == 1)
 				{
@@ -174,9 +225,9 @@
 		public static function searchUserOfTheWeek()
 		{
 			global $dbh,$config;
-			if(isset($_POST['searching'])) {	
+			if(isset($_POST['searching'])) {
 				$searchUser = $dbh->prepare("SELECT * FROM users WHERE username = :user");
-				$searchUser->bindParam(':user', $_POST['user']); 
+				$searchUser->bindParam(':user', $_POST['user']);
 				$searchUser->execute();
 				if ($searchUser->RowCount() == 1)
 				{
@@ -187,7 +238,7 @@
 					Admin::error("User ".$_POST['user']." not found!");
 				}
 			}
-			if(isset($_POST['delete'])) {	
+			if(isset($_POST['delete'])) {
 				$upateUser = $dbh->prepare("UPDATE uotw SET userid = '0' ,text = 'empty'");
 				$upateUser->execute();
 				Admin::succeed("You have removed UOTW");
@@ -231,16 +282,16 @@
 						}
 					}
 					else
-					{	
+					{
 						$getUser = $dbh->prepare("SELECT * FROM users WHERE username=:username LIMIT 1");
 						$getUser->bindParam(':username', $_GET['user']);
 						$getUser->execute();
-						if ($getUser->RowCount() == 1) 
+						if ($getUser->RowCount() == 1)
 						{
 							$user = $getUser->fetch();
 							return filter($user[$variable]);
-						} 
-						else 
+						}
+						else
 						{
 							Admin::error("user not found!"); exit;
 						}
@@ -251,12 +302,12 @@
 					$getUser = $dbh->prepare("SELECT * FROM users WHERE username=:username LIMIT 1");
 					$getUser->bindParam(':username', $_GET['user']);
 					$getUser->execute();
-					if ($getUser->RowCount() == 1) 
+					if ($getUser->RowCount() == 1)
 					{
 						$user = $getUser->fetch();
 						return filter($user[$variable]);
-					} 
-					else 
+					}
+					else
 					{
 						Admin::error("user not found!"); exit;
 					}
@@ -270,12 +321,12 @@
 				$getUser = $dbh->prepare("SELECT * FROM users WHERE username=:username LIMIT 1");
 				$getUser->bindParam(':username', $_GET['user']);
 				$getUser->execute();
-				if ($getUser->RowCount() == 1) 
+				if ($getUser->RowCount() == 1)
 				{
 					$user = $getUser->fetch();
 					return filter($user[$variable]);
-				} 
-				else 
+				}
+				else
 				{
 					Admin::error("user not found!"); exit;
 				}
@@ -284,17 +335,17 @@
 		public static function EditNews($variable)
 		{
 			global $dbh;
-			if (isset($_GET['news'])) 
+			if (isset($_GET['news']))
 			{
 				$getNews = $dbh->prepare("SELECT * FROM cms_news WHERE id=:newsid LIMIT 1");
 				$getNews->bindParam(':newsid', $_GET['news']);
 				$getNews->execute();
-				if ($getNews->RowCount() == 1) 
+				if ($getNews->RowCount() == 1)
 				{
 					$news = $getNews->fetch();
 					return $news[$variable];
-				} 
-				else 
+				}
+				else
 				{
 					Admin::error("No news found!"); exit;
 				}
@@ -303,18 +354,18 @@
 		public static function LookSollie($variable)
 		{
 			Global $dbh,$config;
-			if (isset($_GET['look'])) 
+			if (isset($_GET['look']))
 			{
 				$getSollie = $dbh->prepare("SELECT * FROM staffapplication WHERE id=:look LIMIT 1");
 				$getSollie->bindParam(':look', $_GET['look']);
 				$getSollie->execute();
-				if ($getSollie->RowCount() == 1) 
+				if ($getSollie->RowCount() == 1)
 				{
 					$data = $getSollie->fetch();
 					$datenow = date('d-m-Y', $data['date']);
 					return filter($data[$variable]);
-				} 
-				else 
+				}
+				else
 				{
 					header('Location: '.$config['hotelUrl'].'/adminpan/sollie');
 				}
@@ -323,8 +374,8 @@
 		public static function DeleteNews()
 		{
 			Global $dbh;
-			if(isset($_GET['delete'])) 
-			{ 
+			if(isset($_GET['delete']))
+			{
 				$deleteNews = $dbh->prepare("DELETE FROM cms_news WHERE id=:newsid");
 				$deleteNews->bindParam(':newsid', $_GET['delete']);
 				$deleteNews->execute();
@@ -334,8 +385,8 @@
 		public static function DeleteSollie()
 		{
 			Global $config, $dbh;
-			if(isset($_GET['delete'])) 
-			{ 
+			if(isset($_GET['delete']))
+			{
 				$deleteSollie = $dbh->prepare("DELETE FROM staffapplication WHERE id=:newsid");
 				$deleteSollie->bindParam(':newsid', $_GET['delete']);
 				$deleteSollie->execute();
@@ -346,8 +397,8 @@
 		public static function DeleteBans()
 		{
 			Global $dbh;
-			if(isset($_GET['delete'])) 
-			{ 
+			if(isset($_GET['delete']))
+			{
 				$deleteBan = $dbh->prepare("DELETE FROM bans WHERE id=:newsid");
 				$deleteBan->bindParam(':newsid', $_GET['delete']);
 				$deleteBan->execute();
@@ -370,7 +421,7 @@
 						VALUES
 						(
 						:title,
-						:topstory, 
+						:topstory,
 						:slogan,
 						:news,
 						:id,
@@ -407,4 +458,4 @@
 			{
 			}
 		}
-	}						
+	}
